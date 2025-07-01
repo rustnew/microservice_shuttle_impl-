@@ -1,0 +1,38 @@
+# docker-compose.yml
+version: "3.8"
+services:
+  blog-api:
+    build: ./blog-service
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/blog_db
+      - ANALYTICS_SERVICE_URL=http://analytics-service:3000
+      - ANALYTICS_API_KEY=your-super-secret-api-key-here
+    depends_on:
+      - postgres
+      - analytics-service
+
+  analytics-service:
+    build: ./analytics-service
+    ports:
+      - "3002:3000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/analytics_db
+      - ANALYTICS_API_KEY=your-super-secret-api-key-here
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=blog_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
